@@ -11,18 +11,27 @@
 //global varriables
 
 using namespace std;
+//AddForm
+GtkWidget  *windowAdd;
+GtkWidget  *fixedAdd;
+GtkWidget  *errorOutputAdd;
+GtkWidget  *textEdNameAdd;
+GtkWidget  *textEdLastNameAdd;
+GtkWidget  *textEdBirthdayAdd;
+GtkWidget  *buttonAddFA;
+GtkWidget  *buttonShowFA;
+GtkBuilder *builderAdd;
+//ShowForm
+GtkWidget  *comboShow;
+GtkWidget  *windowShow;
+GtkWidget  *fixedShow;
+GtkWidget  *buttonAddFS;
+GtkWidget  *buttonShowFS;
+GtkBuilder *builderShow;
 
-GtkWidget  *window;
-GtkWidget  *fixed1;
-GtkWidget  *errorOutput;
-GtkWidget  *textEdName;
-GtkWidget  *textEdLastName;
-GtkWidget  *textEdBirthday;
-GtkWidget  *buttonAdd;
-GtkBuilder *builder;
+
 
 vector<int> date;
-vector<string> infoList;
 
 /*
 *
@@ -191,6 +200,7 @@ vector<string> getListOfElements(string personInfo){
 }
 
 void checkInfoFile(string &message_error){
+    vector<string> infoList;
     string filepath = "info.txt";
     ifstream file_to_read;
     file_to_read.open(filepath);
@@ -209,30 +219,39 @@ void checkInfoFile(string &message_error){
     //check if persons have same name and last name
     vector<int>numberRepeatedPersons;
     int list_size = infoList.size();
+    int count_removed_person=0;
     for(int i=0; i<list_size; i++){
         //message_error+=infoList[i]+" ";
-        vector<string>p1=getListOfElements(infoList[i]);
-        int ssss=p1.size();
-        message_error+=to_string(ssss);
-        /*for (int j=0;j<list_size; j++)
+        for (int j=0;j<list_size; j++)
         {
             vector<string>p1=getListOfElements(infoList[i]);
             vector<string>p2=getListOfElements(infoList[j]);
             //message_error+=p2[0];
-            /*if(p1[0]==p2[0]&&p1[1]==p2[1]){
+            if(i!=j&&p1[0]==p2[0]&&p1[1]==p2[1]){
                 //message_error+="Вы насоздовали людей с одинаковыми именами и фамилиями, оди будут удалены\n";
-                numberRepeatedPersons.push_back(j);
-            }*/
-        //}
+                infoList.erase(infoList.begin() + i);
+                list_size-=1;
+                count_removed_person+=1;
+            }
+        }
     }
-    /*std::sort(numberRepeatedPersons.begin(), numberRepeatedPersons.end()); //sort for next eraise repeat
+
+    if(count_removed_person==2){
+        message_error+="Person whis this name won't add to database, because this person exist\n";
+    }
+    if(count_removed_person>2){
+        message_error+="People with same names will remove from database\n";
+    }
+
+    count_removed_person=0;
+    std::sort(numberRepeatedPersons.begin(), numberRepeatedPersons.end()); //sort for next eraise repeat
     auto last = std::unique(numberRepeatedPersons.begin(), numberRepeatedPersons.end()); //remove repeat
     numberRepeatedPersons.erase(last, numberRepeatedPersons.end());                      //remove repeat
-    list_size=numberRepeatedPersons.size();*/
-    /*for(int i=0;i<list_size;i++){
+    list_size=numberRepeatedPersons.size();
+    for(int i=0;i<list_size;i++){
         message_error+=to_string(numberRepeatedPersons[i]);
     }
-    list_size=infoList.size();/*
+    list_size=infoList.size();
     std::ofstream out;   
     out.open(filepath); //open and close file for eraise(for clean thus file)
     out << "";
@@ -245,7 +264,7 @@ void checkInfoFile(string &message_error){
             
         }
     }
-    out.close();*/
+    out.close();
 }
 
 void outputMessageError(GtkWidget *entryName, GtkWidget *entryLastName, GtkWidget *entryBirthday){
@@ -254,14 +273,11 @@ void outputMessageError(GtkWidget *entryName, GtkWidget *entryLastName, GtkWidge
     string birthday;
     string message_error = "";
 
-    verifyIsInputData(message_error, textEdName, name, "name");
-    verifyIsInputData(message_error, textEdLastName, last_name, "last name");
-    verifyIsInputData(message_error, textEdBirthday, birthday, "birthday");
+    verifyIsInputData(message_error, textEdNameAdd, name, "name");
+    verifyIsInputData(message_error, textEdLastNameAdd, last_name, "last name");
+    verifyIsInputData(message_error, textEdBirthdayAdd, birthday, "birthday");
     message_error += chechDateFormat(birthday, date);
-    /*int ds = date.size(); 
-    for(int i =0;i<ds;i++){
-        message_error+=to_string(date[i])+" ";
-    }*/
+    
     string filepath = "info.txt"; // окрываем файл для записи
     if (message_error==""){
         Person p{name, last_name, date[0], date[1], date[2]};
@@ -278,54 +294,85 @@ void outputMessageError(GtkWidget *entryName, GtkWidget *entryLastName, GtkWidge
     //check is in fileInfo Persons with same name and lastname
     checkInfoFile(message_error);
 
-    gtk_label_set_text(GTK_LABEL(errorOutput), message_error.c_str());
+    gtk_label_set_text(GTK_LABEL(errorOutputAdd), message_error.c_str());
 
     message_error = "";
 
-    /*if(name == "1"){
-        gtk_label_set_text(GTK_LABEL(labelName), name.c_str());
-    }
-    */
     date.clear();
-
 }
 
+
+
+void formShow(){
+    builderShow = gtk_builder_new_from_file("designShow.glade");
+   
+    windowShow = GTK_WIDGET(gtk_builder_get_object(builderShow, "window"));
+
+    g_signal_connect(windowShow, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    gtk_builder_connect_signals(builderShow, NULL);
+
+    fixedShow = GTK_WIDGET(gtk_builder_get_object(builderShow, "fixed"));
+    buttonAddFS = GTK_WIDGET(gtk_builder_get_object(builderShow, "buttonAdd"));
+    buttonShowFS = GTK_WIDGET(gtk_builder_get_object(builderShow, "buttonShow"));
+
+    gtk_widget_show(windowShow);
+    gtk_main();
+}
+
+void formAdd(){
+    builderAdd = gtk_builder_new_from_file("designAdd.glade");
+   
+    windowAdd = GTK_WIDGET(gtk_builder_get_object(builderAdd, "window"));
+
+    g_signal_connect(windowAdd, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    gtk_builder_connect_signals(builderAdd, NULL);
+
+    fixedAdd = GTK_WIDGET(gtk_builder_get_object(builderAdd, "fixedAdd"));
+    buttonAddFA = GTK_WIDGET(gtk_builder_get_object(builderAdd, "buttonAdd"));
+    textEdNameAdd = GTK_WIDGET(gtk_builder_get_object(builderAdd, "textEdName"));
+    textEdLastNameAdd = GTK_WIDGET(gtk_builder_get_object(builderAdd, "textEdLastName"));
+    textEdBirthdayAdd = GTK_WIDGET(gtk_builder_get_object(builderAdd, "textEdBirthday"));
+    errorOutputAdd = GTK_WIDGET(gtk_builder_get_object(builderAdd, "errorOutput"));
+
+    gtk_widget_show(windowAdd);
+    gtk_main();
+}
 const gchar* gpa_receive_key_dialog_get_id (GtkWidget *entry)
 {
   return gtk_entry_get_text (GTK_ENTRY(entry));
 }
 
-extern "C" void on_button1_clicked(GtkButton *button, gpointer data)
-{
-    //const gchar* name = gpa_receive_key_dialog_get_id(textEdName);
-    outputMessageError(textEdName, textEdLastName, textEdBirthday);
+
+//FormShow
+extern "C" void on_buttonShowFS_clicked(GtkButton *button, gpointer data){
+
 }
 
+extern "C" void on_buttonAddFS_clicked(GtkButton *button, gpointer data)
+{
+    gtk_widget_hide_on_delete(windowShow);
+    formAdd();
+}
 
-
+//FormAdd
+extern "C" void on_buttonShowFA_clicked(GtkButton *button, gpointer data)
+{
+    gtk_widget_hide_on_delete(windowAdd);
+    formShow();
+}
+extern "C" void on_buttonAddFA_clicked(GtkButton *button, gpointer data)
+{
+    //const gchar* name = gpa_receive_key_dialog_get_id(textEdName);
+    outputMessageError(textEdLastNameAdd, textEdLastNameAdd, textEdBirthdayAdd);
+}
 int main (int argc, char *argv[]){
 
+    //FormShow
     gtk_init( & argc, & argv );
-   
-    builder = gtk_builder_new_from_file("design.glade");
-   
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
+    formShow();
 
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
-    gtk_builder_connect_signals(builder, NULL);
-
-    fixed1 = GTK_WIDGET(gtk_builder_get_object(builder, "fixed1"));
-    buttonAdd = GTK_WIDGET(gtk_builder_get_object(builder, "buttonAdd"));
-    textEdName = GTK_WIDGET(gtk_builder_get_object(builder, "textEdName"));
-    textEdLastName = GTK_WIDGET(gtk_builder_get_object(builder, "textEdLastName"));
-    textEdBirthday = GTK_WIDGET(gtk_builder_get_object(builder, "textEdBirthday"));
-    errorOutput = GTK_WIDGET(gtk_builder_get_object(builder, "errorOutput"));
-
-
-
-    gtk_widget_show(window);
-    gtk_main();
     return EXIT_SUCCESS;
 
 }
