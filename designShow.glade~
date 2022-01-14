@@ -40,7 +40,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="textEdFullName">
+          <object class="GtkEntry" id="textEdFullNameShow">
             <property name="width-request">100</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
