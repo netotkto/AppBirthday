@@ -6,5 +6,6 @@
 #include <ctime>
 #include <fstream> 
 #include <algorithm>
+#include <cctype>
 
 using namespace std;

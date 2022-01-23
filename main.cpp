@@ -1,8 +1,10 @@
 #include "include/include.h"
+#include "include/toUpperCase.h"
 #include "include/formElements.h"
 #include "include/Date.h"
 #include "include/Person.h"
 #include "include/getListOfElements.h"
+#include "include/getInfoFromFile.h"
 #include "include/formShow.h"
 #include "include/formAdd.h"
 

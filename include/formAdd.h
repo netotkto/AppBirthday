@@ -22,6 +22,17 @@ bool verifyIsInputData(string &message_error, GtkWidget *entry, string &enterInf
     }
 }
 
+bool verifyIsInputDataValid(string &message_error, string enterInfo, string fieldName){
+    int enterInfoSize=enterInfo.size();
+    for(int i=0; i<enterInfoSize; i++){
+        if(enterInfo[i]==' ' || enterInfo[i] == '/'){
+            message_error += "Invalid input (there is \'/\' oe \' \') "+ fieldName +".\n";
+            return true;
+        }
+    }
+    return false;
+}
+
 bool isDig(char s){ 
     if(s >= '0' && s <= '9')
         return true;
@@ -67,7 +78,7 @@ string chechDateFormat(string s_date, vector<int> &date){ //s_date is birthday d
     if (date.size() != 3 )
         return "date isn't valid\n";
     else {
-        string sdate = to_string(date[0])+"/"+to_string(date[1])+"/"+to_string(date[2]);
+        //string sdate = to_string(date[0])+"/"+to_string(date[1])+"/"+to_string(date[2]);
 
         time_t ttime = time(0);
         std::tm *local_time = localtime(&ttime);
@@ -93,22 +104,7 @@ string chechDateFormat(string s_date, vector<int> &date){ //s_date is birthday d
 }
 
 void checkInfoFile(string &message_error){
-    vector<string> infoList;
-    string filepath = "info.txt";
-    ifstream file_to_read;
-    file_to_read.open(filepath);
-    if(!file_to_read.is_open()){
-        message_error+="There is error opening info.txt\n";
-    }
-    else{
-        //ok
-        string str;
-        while(!file_to_read.eof()){
-            file_to_read >> str;
-            infoList.push_back(str);
-        }
-
-    }
+    vector<string> infoList=getInfoFromFile(message_error);
     //check if persons have same name and last name
     vector<int>numberRepeatedPersons;
     int list_size = infoList.size();
@@ -129,10 +125,10 @@ void checkInfoFile(string &message_error){
     }
 
     if(count_removed_person==2){
-        message_error+="Person whis this name won't add to database, because this person exist\n";
+        message_error+="Person with this name won't add to database,\nbecause this person exist\n";
     }
     if(count_removed_person>2){
-        message_error+="People with same names will remove from database\n";
+        message_error+="People with same names \nwill remove from database\n";
     }
 
     count_removed_person=0;
@@ -145,6 +141,7 @@ void checkInfoFile(string &message_error){
     }
     list_size=infoList.size();
     std::ofstream out;   
+    string filepath="info.txt";
     out.open(filepath); //open and close file for eraise(for clean thus file)
     out << "";
     out.close();
@@ -168,13 +165,18 @@ void addPersonToBase(GtkWidget *entryName, GtkWidget *entryLastName, GtkWidget *
     verifyIsInputData(message_error, textEdNameAdd, name, "name");
     verifyIsInputData(message_error, textEdLastNameAdd, last_name, "last name");
     verifyIsInputData(message_error, textEdBirthdayAdd, birthday, "birthday");
+
+    verifyIsInputDataValid(message_error, name, "name");
+    verifyIsInputDataValid(message_error, last_name, "last name");
+    verifyIsInputDataValid(message_error, birthday, "birthday");
     message_error += chechDateFormat(birthday, date);
     
     string filepath = "info.txt"; // open file for writing
     if (message_error==""){
-        Person p{name, last_name, date[0], date[1], date[2]};
         std::ofstream out;   
         out.open(filepath, ofstream::app); 
+        name=toUpperCase(name);
+        last_name=toUpperCase(last_name);
         string infoLine = name+"/"+last_name+"/"+to_string(date[0])+"/"+to_string(date[1])+"/"+to_string(date[2])+"/";
         if (out.is_open())
         {   
