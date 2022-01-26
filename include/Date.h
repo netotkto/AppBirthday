@@ -297,7 +297,7 @@ struct Date{
             }
         }
         weeksCount=daysCount/7;
-        fullAge=fullAge+to_string(leap_yearCount)+" y.o. | "+to_string(monthsCount)+" m. | "+to_string(weeksCount)+" w. | "+to_string(daysCount)+" d.";
+        fullAge=fullAge+to_string(yearsCount)+" y.o. | "+to_string(monthsCount)+" m. | "+to_string(weeksCount)+" w. | "+to_string(daysCount)+" d.";
         return fullAge;
     }
 
